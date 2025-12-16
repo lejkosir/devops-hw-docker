@@ -18,14 +18,21 @@ RUN npm install
 
 RUN sed -i "s|destination: 'http://localhost:80/taprav-fri/api/:path\\*'|destination: 'http://backend:80/taprav-fri/api/:path*'|" next.config.ts
 
+# http namesto https
+RUN sed -i "s|require('https')|require('http')|" /srv/frontend/server.js && \
+    sed -i "/const httpsOptions = {/,/};/d" /srv/frontend/server.js && \
+    sed -i "s|createServer(httpsOptions,|createServer(|" /srv/frontend/server.js && \
+    sed -i "s|HTTPS server running on https|HTTP server running on http|" /srv/frontend/server.js
+
+
 # samopodpisano SPREMENI!!!
-RUN mkdir -p /etc/ssl/localcerts && \
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/ssl/localcerts/nextjs.key \
-    -out /etc/ssl/localcerts/nextjs.crt \
-    -subj "/CN=localhost" && \
-    chown node:node /etc/ssl/localcerts/nextjs.key && \
-    chmod 600 /etc/ssl/localcerts/nextjs.key
+# RUN mkdir -p /etc/ssl/localcerts && \
+#     openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+#     -keyout /etc/ssl/localcerts/nextjs.key \
+#     -out /etc/ssl/localcerts/nextjs.crt \
+#     -subj "/CN=localhost" && \
+#     chown node:node /etc/ssl/localcerts/nextjs.key && \
+#     chmod 600 /etc/ssl/localcerts/nextjs.key
 
 RUN npm run build
 
