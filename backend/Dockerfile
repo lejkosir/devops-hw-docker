@@ -46,8 +46,10 @@ RUN mkdir -p /var/www/html/taprav-fri/api && \
     chown -R www-data:www-data /var/www/html/taprav-fri/api
 
 RUN sed -i "s/define('DB_USER', 'root');/define('DB_USER', 'user');/" /var/www/html/taprav-fri/api/includes/config.php && \
-    sed -i "s/define('DB_HOST', '127.0.0.1');/define('DB_HOST', 'mysql');/" /var/www/html/taprav-fri/api/includes/config.php && \
-    sed -i "s/\$redis->connect('127\.0\.0\.1', 6379)/\$redis->connect('redis', 6379)/" /var/www/html/taprav-fri/api/includes/config.php
+    sed -i "s/define('DB_HOST', '127.0.0.1');/define('DB_HOST', 'mysql-taprav-fri');/" /var/www/html/taprav-fri/api/includes/config.php && \
+    sed -i "s/\$redis->connect('127\.0\.0\.1', 6379)/\$redis->connect('redis', 6379)/" /var/www/html/taprav-fri/api/includes/config.php && \
+    sed -i 's/port=3307;//' /var/www/html/taprav-fri/api/includes/config.php
+
 
 # forward 80
 EXPOSE 80

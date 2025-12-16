@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: backend
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+      - redis
+    restart: unless-stopped
+    networks:
+      - net
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - net
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-taprav-fri
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: skrito123
+      MYSQL_DATABASE: taprav-fri
+      MYSQL_USER: user
+      MYSQL_PASSWORD: skrito123
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+      - mysql-data:/var/lib/mysql
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --bind-address=0.0.0.0
+    restart: unless-stopped
+    networks:
+      - net
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - net
+
+networks:
+  net:
+    driver: bridge
+
+volumes:
+  mysql-data:

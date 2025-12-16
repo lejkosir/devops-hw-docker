@@ -1,0 +1,3 @@
+CREATE USER IF NOT EXISTS 'user'@'%' IDENTIFIED BY 'skrito123';
+GRANT ALL PRIVILEGES ON `taprav-fri`.* TO 'user'@'%';
+FLUSH PRIVILEGES;
