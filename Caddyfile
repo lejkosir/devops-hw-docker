@@ -1,0 +1,7 @@
+{
+  email mb2889@student.uni-lj.si
+}
+
+devops-sk-07.lrk.si {
+  reverse_proxy frontend:3000
+}
