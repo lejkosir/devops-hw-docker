@@ -1,4 +1,7 @@
-FROM node:lts
+# =========================
+# BUILD STAGE
+# =========================
+FROM node:lts AS build
 
 WORKDIR /app
 
@@ -24,7 +27,6 @@ RUN sed -i "s|require('https')|require('http')|" /srv/frontend/server.js && \
     sed -i "s|createServer(httpsOptions,|createServer(|" /srv/frontend/server.js && \
     sed -i "s|HTTPS server running on https|HTTP server running on http|" /srv/frontend/server.js
 
-
 # samopodpisano SPREMENI!!!
 # RUN mkdir -p /etc/ssl/localcerts && \
 #     openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
@@ -36,10 +38,21 @@ RUN sed -i "s|require('https')|require('http')|" /srv/frontend/server.js && \
 
 RUN npm run build
 
-# ne root
-USER node
+
+# =========================
+# RUNTIME STAGE (DISTROLESS)
+# =========================
+FROM gcr.io/distroless/nodejs20
+
+WORKDIR /srv/frontend
+
+# copy everything needed from build stage
+COPY --from=build /srv/frontend /srv/frontend
+
+# ne root (distroless already runs as non-root)
+# USER node
 
 # forward
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["server.js"]
