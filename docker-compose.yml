@@ -57,9 +57,24 @@ services:
     networks:
       - net
 
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - net
+
 networks:
   net:
     driver: bridge
 
 volumes:
   mysql-data:
+  caddy_data:
+  caddy_config:

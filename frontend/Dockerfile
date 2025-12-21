@@ -1,6 +1,4 @@
-# =========================
-# BUILD STAGE
-# =========================
+# build stage
 FROM node:lts AS build
 
 WORKDIR /app
@@ -39,9 +37,7 @@ RUN sed -i "s|require('https')|require('http')|" /srv/frontend/server.js && \
 RUN npm run build
 
 
-# =========================
-# RUNTIME STAGE (DISTROLESS)
-# =========================
+# runtime stage (distroless)
 FROM gcr.io/distroless/nodejs20
 
 WORKDIR /srv/frontend
