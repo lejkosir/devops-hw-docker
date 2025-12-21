@@ -9,6 +9,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
+
 env:
   DOCKER_REGISTRY: ghcr.io
   DOCKER_IMAGE_BASE: ${{ github.repository }}
