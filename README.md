@@ -1,20 +1,20 @@
-# DevOps HW – Dockerized Application Stack
+# DevOps HW – Docker
 
-This repository contains a fully containerized, production‑like web application stack developed as part of the **DevOps – Containers & CI/CD** homework. The goal of the project was to design, build, secure, and deploy a real‑world multi‑service application using Docker, Docker Compose, GitHub Actions (CI/CD), and TLS.
+This repository contains a fully containerized, production‑like web application stack developed as part of the DevOp homework. The goal of the project was to secure, and deploy a real‑world multi‑service application using Docker, Docker Compose, GitHub Actions (CI/CD), and TLS.
 
 ---
 
-## 🔗 Live Deployment
+## Live Deployment
 
 The application stack is deployed on the university DevOps VM and is publicly accessible over HTTPS:
 
-👉 **[https://devops-sk-07.lrk.si](https://devops-sk-07.lrk.si)**
+**[https://devops-sk-07.lrk.si](https://devops-sk-07.lrk.si)**
 
 TLS is provided automatically via **Let’s Encrypt**, managed by **Caddy**.
 
 ---
 
-## 🧩 Architecture Overview
+## Architecture Overview
 
 The application consists of **five independent services**, orchestrated using Docker Compose:
 
@@ -26,11 +26,17 @@ The application consists of **five independent services**, orchestrated using Do
 | **redis**    | Redis cache service                     |
 | **caddy**    | Reverse proxy + HTTPS (TLS termination) |
 
-All services communicate over a dedicated Docker bridge network.
+All services communicate over a dedicated Docker bridge network `net`.
+
+The architecture differs from hw1, because a reverse proxy (caddy) was added to allow for easier use of TLS and increased security.
+
+All services are spun up from docker compose. Backend and frontend have their own dockerfiles due to more complex initialization. Mysql mounts a persistent data volume and an init script. Redis uses the default image without customization and caddy has some mounted volumes.
+
+Frontend no longer uses a self-signed certificate for TLS.
 
 ---
 
-## 🐳 Docker & Docker Compose
+## Docker & Docker Compose
 
 The entire stack is defined declaratively in `docker-compose.yml` and can be started with:
 
@@ -50,7 +56,7 @@ This ensures data persistence across container restarts.
 
 ---
 
-## 🏗️ Custom Images & Multi‑Stage Builds
+## Custom Images & Multi‑Stage Builds
 
 At least one service (**frontend**) is built using a **multi‑stage Dockerfile**:
 
@@ -65,7 +71,7 @@ Docker **BuildX** is used in CI/CD to optimize the build process and support adv
 
 ---
 
-## 🔁 CI/CD – GitHub Actions
+## CI/CD – GitHub Actions
 
 A complete CI/CD pipeline is implemented using **GitHub Actions**.
 
@@ -75,14 +81,13 @@ A complete CI/CD pipeline is implemented using **GitHub Actions**.
 * Builds Docker images using BuildX
 * Automatically tags images
 * Pushes images to **GitHub Container Registry (GHCR)**
-
-📦 Published images are visible under the repository’s **Packages** section.
+ Published images are visible under the repository’s **Packages** section.
 
 > Automatic deployment is intentionally not enabled, as per assignment instructions.
 
 ---
 
-## 🔐 TLS / HTTPS Configuration
+## TLS / HTTPS Configuration
 
 TLS is configured using **Caddy**:
 
@@ -91,11 +96,15 @@ TLS is configured using **Caddy**:
 * Automatic renewal
 * Uses **TLS‑ALPN‑01** challenge (required due to restricted port 80)
 
-No self‑signed certificates are used — this is a production‑grade TLS setup.
 
 ---
-
-## 🌍 Deployment
+## Security
+* No exposed ports other than 80, 443
+* Only accessible via https
+* No default credentials
+* Only access to frontend via reverse proxy
+---
+## Deployment
 
 The stack is deployed on the university VM:
 
@@ -107,75 +116,30 @@ All services run inside Docker containers; no application services are exposed d
 
 ---
 
-## 🛠️ How to Run Locally
-
-Prerequisites:
-
-* Docker
-* Docker Compose (v2)
-
-Steps:
-
-```bash
-git clone <repository-url>
-cd dn02
-docker compose up -d
-```
-
-The frontend will be available at:
-
-```
-http://localhost:3000
-```
-
----
-
-## 📂 Repository Structure (Simplified)
+## Repository Structure (Simplified)
 
 ```
 .
+├── .github/workflows/
+│   └── publish.yml
 ├── backend/
 │   └── Dockerfile
 ├── frontend/
 │   └── Dockerfile
-├── caddy/
-│   └── Caddyfile
-├── docker-compose.yml
-├── .github/workflows/
-│   └── publish.yml
-└── README.md
+├── init/
+│   ├── 01-init.sql
+│   └── taprav-fri.sql
+├── Caddyfile
+├── README.md
+└── docker-compose.yml
 ```
 
 ---
 
-## 📌 Notes & Limitations
+## Notes & Limitations
 
 * Port **80** is blocked on the VM → TLS‑ALPN‑01 challenge is used instead of HTTP‑01
 * CI/CD builds images but does not auto‑deploy (by design)
 * Secrets are managed via environment variables and Docker volumes
 
 ---
-
-## ✅ Assignment Requirements Checklist
-
-* [x] 4+ independent services
-* [x] Docker Compose orchestration
-* [x] Persistent volumes
-* [x] Multi‑stage custom image
-* [x] BuildX usage
-* [x] CI/CD with GitHub Actions
-* [x] TLS (Let’s Encrypt)
-* [x] Public deployment
-* [x] Infrastructure as Code
-
----
-
-## 👤 Author
-
-**Matej Bokal**
-Faculty of Computer and Information Science (FRI)
-University of Ljubljana
-
----
-
-This project demonstrates a realistic, secure, and automated containerized deployment workflow suitable for real‑world applications.
