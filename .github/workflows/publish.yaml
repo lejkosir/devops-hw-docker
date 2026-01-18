@@ -3,7 +3,7 @@ name: publish
 on:
   push:
     branches:
-      - main
+      - '**'
     tags:
       - 'v*.*.*'
   pull_request:
@@ -34,6 +34,35 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # NEW: Build Next.js app for frontend BEFORE Docker build
+      - name: Build frontend application
+        if: matrix.service.name == 'frontend'
+        run: |
+          # Clone the source code repository
+          git clone -b relative https://github.com/MatejBokal/devops-spletna /tmp/devops-spletna
+          
+          # Navigate to frontend directory
+          cd /tmp/devops-spletna/code/taprav-fri/frontend
+          
+          # Install dependencies
+          npm install
+          
+          # Apply configuration changes
+          sed -i "s|destination: 'http://localhost:80/taprav-fri/api/:path\\*'|destination: 'http://backend:80/taprav-fri/api/:path*'|" next.config.ts
+          
+          # Apply server.js modifications BEFORE build
+          sed -i "s|require('https')|require('http')|" server.js && \
+          sed -i "/const httpsOptions = {/,/};/d" server.js && \
+          sed -i "s|createServer(httpsOptions,|createServer(|" server.js && \
+          sed -i "s|HTTPS server running on https|HTTP server running on http|" server.js || true
+          
+          # Build the Next.js application
+          npm run build
+          
+          # Copy built application into frontend/ directory (Docker build context)
+          # This makes it available for Docker COPY command
+          cp -r . ${{ github.workspace }}/frontend/
 
       - name: Docker meta
         id: meta
